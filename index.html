@@ -1,86 +1,94 @@
 <!doctype html>
-<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#090b16"><title>Aşkın Gölgesinde 3D</title>
+<html lang="tr">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no,viewport-fit=cover">
+<meta name="theme-color" content="#171526">
+<title>Aşkın Gölgesinde — 3D Romantik Macera</title>
 <style>
-*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090b16;color:#fff;font-family:Arial,sans-serif;touch-action:none}
-#game{position:fixed;inset:0}canvas{width:100%;height:100%;display:block}
-#top{position:absolute;top:env(safe-area-inset-top,10px);left:0;right:0;padding:12px 16px;display:flex;justify-content:space-between;pointer-events:none;text-shadow:0 2px 5px #000}
-.brand{font-family:Georgia,serif;font-size:19px;color:#e6c78e;letter-spacing:1px}.small{font-size:10px;letter-spacing:2px;color:#e9d9bd;margin-top:4px}
-#hint{position:absolute;top:78px;left:50%;transform:translateX(-50%);background:#100e1bcc;border:1px solid #d3b47866;border-radius:20px;padding:9px 14px;font-size:12px;white-space:nowrap;max-width:90%;text-align:center}
-#dialog{position:absolute;left:12px;right:12px;bottom:18px;background:linear-gradient(145deg,#211b2aee,#100e18f5);border:1px solid #c8a56b88;border-radius:18px;padding:17px;display:none;box-shadow:0 10px 35px #0009}
-#speaker{font-size:11px;letter-spacing:2px;color:#e6c78e;margin-bottom:8px}#line{font-family:Georgia,serif;font-size:17px;line-height:1.45;margin-bottom:13px}
-.choices{display:flex;gap:8px;flex-wrap:wrap}button{background:linear-gradient(135deg,#72505a,#382b3d);color:white;border:1px solid #c8a56b;border-radius:12px;padding:12px 14px;font-size:13px;flex:1;min-width:130px}
-#controls{position:absolute;bottom:22px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
-.pad{width:132px;height:132px;position:relative;pointer-events:auto}
-.key{position:absolute;width:42px;height:42px;border-radius:13px;background:#181625bb;border:1px solid #d6bd8b88;color:white;display:grid;place-items:center;font-size:19px;user-select:none}
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#171526;color:#fff;font-family:Arial,sans-serif;touch-action:none}
+#game{position:fixed;inset:0;background:linear-gradient(180deg,#31304d 0%,#66516a 42%,#bd806f 72%,#29243a 100%)}canvas{width:100%;height:100%;display:block;background:transparent}
+#top{position:absolute;top:env(safe-area-inset-top,10px);left:0;right:0;padding:12px 16px;display:flex;justify-content:space-between;pointer-events:none;text-shadow:0 2px 6px #100d20}
+.brand{font-family:Georgia,serif;font-size:19px;color:#f0d19a;letter-spacing:1px}.small{font-size:10px;letter-spacing:2px;color:#f0dfc8;margin-top:4px}
+#hint{position:absolute;top:78px;left:50%;transform:translateX(-50%);background:#171526bd;border:1px solid #e4c28a66;border-radius:20px;padding:9px 14px;font-size:12px;line-height:1.35;text-align:center;white-space:normal;width:max-content;max-width:calc(100vw - 32px);color:#f5e9d8;box-shadow:0 5px 18px #120d1b55}
+#dialog{position:absolute;left:12px;right:12px;bottom:18px;background:linear-gradient(145deg,#30253bee,#171526f5);border:1px solid #d6b57899;border-radius:18px;padding:17px;display:none;box-shadow:0 12px 36px #09071199}
+#speaker{font-size:11px;letter-spacing:2px;color:#f0d19a;margin-bottom:8px}#line{font-family:Georgia,serif;font-size:17px;line-height:1.45;margin-bottom:13px}
+.choices{display:flex;gap:8px;flex-wrap:wrap}button{background:linear-gradient(135deg,#815b67,#46364f);color:white;border:1px solid #d2b178;border-radius:12px;padding:12px 14px;font-size:13px;flex:1;min-width:120px;cursor:pointer}
+#controls{position:absolute;bottom:max(22px,env(safe-area-inset-bottom));left:18px;right:18px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
+.pad{width:132px;height:132px;position:relative;pointer-events:auto}.key{position:absolute;width:42px;height:42px;border-radius:13px;background:#1a1928c9;border:1px solid #e1c99599;color:white;display:grid;place-items:center;font-size:19px;user-select:none;touch-action:none}
 #up{top:0;left:45px}#down{bottom:0;left:45px}#left{top:45px;left:0}#right{top:45px;right:0}
-#act{pointer-events:auto;border-radius:50%;width:76px;height:76px;background:#7a4b60dd;font-weight:bold}
-#look{position:absolute;right:0;top:22%;width:48%;height:52%;pointer-events:auto}
-#start{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#46334a,#090b16 75%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
-.panel{max-width:420px;background:#171521dd;border:1px solid #d1ae7288;border-radius:22px;padding:25px;box-shadow:0 20px 60px #0009}
-h1{font-family:Georgia,serif;font-weight:normal;color:#e8c990;font-size:34px;margin:8px 0}.sub{font-size:11px;letter-spacing:3px;color:#d4b987}.panel p{color:#e7dfe6;line-height:1.5;font-size:14px}.panel button{width:100%;margin-top:12px;padding:15px}
-#toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#171521ed;padding:15px 20px;border:1px solid #d1ae72;border-radius:14px;display:none;text-align:center}
+#act{pointer-events:auto;border-radius:999px;min-width:132px;width:auto;height:52px;padding:0 20px;background:linear-gradient(135deg,#a86970ee,#68445fee);font-size:12px;letter-spacing:1px;font-weight:700;box-shadow:0 6px 20px #130d1c88}
+#look{position:absolute;right:0;top:22%;width:48%;height:52%;pointer-events:auto;touch-action:none}
+#start{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#75546d 0%,#37304a 48%,#171526 100%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+.panel{max-width:420px;background:#211e2cdd;border:1px solid #d1ae7288;border-radius:22px;padding:25px;box-shadow:0 20px 60px #0009}
+h1{font-family:Georgia,serif;font-weight:normal;color:#f0d19a;font-size:34px;margin:8px 0}.sub{font-size:11px;letter-spacing:3px;color:#e4c99b}.panel p{color:#eee4e7;line-height:1.5;font-size:14px}
+#toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#211e2ced;padding:15px 20px;border:1px solid #d1ae72;border-radius:14px;display:none;text-align:center;max-width:calc(100vw - 32px)}
+@media(max-width:480px){.brand{font-size:16px}.small{font-size:9px;letter-spacing:1.5px}#hint{top:72px;font-size:11px;padding:8px 11px}.pad{transform:scale(.88);transform-origin:left bottom}#act{min-width:122px;height:48px;padding:0 15px}}
 @media(min-width:700px){#controls{max-width:720px;margin:auto;left:0;right:0}.pad{width:150px;height:150px}}
-</style></head><body>
+</style>
+</head>
+<body>
 <div id="game"><canvas id="gl"></canvas></div>
 <div id="top"><div><div class="brand">Aşkın Gölgesinde</div><div class="small">3D ROMANTİK MACERA</div></div><div class="small" id="score">YAKINLIK ♥ 0</div></div>
-<div id="hint">WASD / ok tuşları veya ekrandaki yön tuşlarıyla ilerle · Sağ tarafı sürükleyerek etrafa bak</div>
-<div id="look"></div>
+<div id="hint">Yön tuşlarıyla ilerle · Sağ tarafı sürükleyerek etrafa bak</div><div id="look"></div>
 <div id="controls"><div class="pad"><div class="key" id="up">▲</div><div class="key" id="down">▼</div><div class="key" id="left">◀</div><div class="key" id="right">▶</div></div><button id="act">ETKİLEŞİM</button></div>
-<div id="dialog"><div id="speaker">LORENZO MORETTI</div><div id="line"></div><div class="choices" id="choices"></div></div>
-<div id="toast"></div>
-<div id="start"><div class="panel"><div class="sub">NEW YORK · 22:45</div><h1>Aşkın Gölgesinde</h1><p>Şehrin ışıkları altında lüks bir çatı katında başlayan 3D romantik macera. Etrafı keşfet, Lorenzo'yu bul ve hikâyenin yönünü seçimlerinle belirle.</p><button id="begin">OYUNA BAŞLA</button><div class="small" style="margin-top:14px">TELEFONDA DOKUNARAK OYNANIR</div></div></div>
+<div id="dialog"><div id="speaker">LORENZO MORETTI</div><div id="line"></div><div class="choices" id="choices"></div></div><div id="toast"></div>
+<div id="start"><div class="panel"><div class="sub">NEW YORK · 22:45</div><h1>Aşkın Gölgesinde</h1><p>Şehrin ışıkları altında lüks bir çatı katında başlayan 3D romantik macera. Lorenzo'yu bulmak için terasa doğru ilerle.</p><button id="begin">MACERAYA BAŞLA</button></div></div>
 <script>
 (()=>{
-const canvas=document.getElementById('gl'), gl=canvas.getContext('webgl',{antialias:true});
+const canvas=document.getElementById('gl'),gl=canvas.getContext('webgl',{antialias:true,alpha:true});
 if(!gl){document.getElementById('hint').textContent='Bu tarayıcı WebGL desteklemiyor.';return;}
-const vs=`attribute vec3 p; attribute vec3 n; uniform mat4 mvp; uniform mat4 model; varying vec3 N; varying vec3 W; void main(){vec4 w=model*vec4(p,1.);W=w.xyz;N=mat3(model)*n;gl_Position=mvp*vec4(p,1.);}`;
-const fs=`precision mediump float; varying vec3 N; varying vec3 W; uniform vec3 color; uniform vec3 lightDir; void main(){float d=max(dot(normalize(N),normalize(lightDir)),0.);float city=0.05+0.16*max(0.,sin(W.x*13.)*sin(W.z*17.));vec3 c=color*(0.38+0.62*d)+vec3(city*.9,city*.65,city);gl_FragColor=vec4(c,1.);}`;
-function shader(type,src){let s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s}
-let prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
-let loc={p:gl.getAttribLocation(prog,'p'),n:gl.getAttribLocation(prog,'n'),mvp:gl.getUniformLocation(prog,'mvp'),model:gl.getUniformLocation(prog,'model'),color:gl.getUniformLocation(prog,'color'),light:gl.getUniformLocation(prog,'lightDir')};
-function mesh(pos,norm,idx){let b={};b.v=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b.v);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);b.n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b.n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(norm),gl.STATIC_DRAW);b.i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,b.i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);b.count=idx.length;return b}
-function cube(){let p=[],n=[],idx=[];let faces=[[[0,0,1],[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]],[[0,0,-1],[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5]],[[1,0,0],[.5,-.5,.5],[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5]],[[-1,0,0],[-.5,-.5,-.5],[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5]],[[0,1,0],[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5],[-.5,.5,-.5]],[[0,-1,0],[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,.5]]];faces.forEach(f=>{let k=p.length/3;for(let i=1;i<5;i++){p.push(...f[i]);n.push(...f[0])}idx.push(k,k+1,k+2,k,k+2,k+3)});return mesh(p,n,idx)}
-function sphere(){let p=[],n=[],idx=[],lat=10,lon=14;for(let y=0;y<=lat;y++){let a=y*Math.PI/lat;for(let x=0;x<=lon;x++){let b=x*2*Math.PI/lon,X=Math.sin(a)*Math.cos(b),Y=Math.cos(a),Z=Math.sin(a)*Math.sin(b);p.push(X*.5,Y*.5,Z*.5);n.push(X,Y,Z)}}for(let y=0;y<lat;y++)for(let x=0;x<lon;x++){let i=y*(lon+1)+x;idx.push(i,i+lon+1,i+1,i+1,i+lon+1,i+lon+2)}return mesh(p,n,idx)}
+const vs=`attribute vec3 p;attribute vec3 n;uniform mat4 mvp;uniform mat4 model;varying vec3 N;varying vec3 W;void main(){vec4 w=model*vec4(p,1.);W=w.xyz;N=normalize(mat3(model)*n);gl_Position=mvp*vec4(p,1.);}`;
+const fs=`precision mediump float;varying vec3 N;varying vec3 W;uniform vec3 color;uniform vec3 lightDir;uniform float emissive;void main(){vec3 normal=normalize(N);float key=max(dot(normal,normalize(lightDir)),0.);float rim=pow(1.0-max(dot(normal,vec3(0.0,0.0,1.0)),0.0),2.0);vec3 lit=color*(0.43+key*0.68)+vec3(0.22,0.12,0.27)*rim*0.55+color*emissive;float dist=length(W-vec3(0.0,2.0,7.0));float fog=smoothstep(19.0,52.0,dist);vec3 fogColor=mix(vec3(0.22,0.18,0.31),vec3(0.43,0.31,0.39),clamp((W.y+1.0)/13.0,0.0,1.0));gl_FragColor=vec4(mix(lit,fogColor,fog*0.78),1.0);}`;
+function shader(type,src){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);if(!gl.getShaderParameter(s,gl.COMPILE_STATUS))throw new Error(gl.getShaderInfoLog(s));return s;}
+const prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+const loc={p:gl.getAttribLocation(prog,'p'),n:gl.getAttribLocation(prog,'n'),mvp:gl.getUniformLocation(prog,'mvp'),model:gl.getUniformLocation(prog,'model'),color:gl.getUniformLocation(prog,'color'),lightDir:gl.getUniformLocation(prog,'lightDir'),emissive:gl.getUniformLocation(prog,'emissive')};
+function mesh(pos,norm,idx){const b={count:idx.length};b.v=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b.v);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);b.n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b.n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(norm),gl.STATIC_DRAW);b.i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,b.i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);return b;}
+function cube(){const p=[],n=[],idx=[];const faces=[[[0,0,1],[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]],[[0,0,-1],[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5]],[[1,0,0],[.5,-.5,.5],[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5]],[[-1,0,0],[-.5,-.5,-.5],[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5]],[[0,1,0],[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5],[-.5,.5,-.5]],[[0,-1,0],[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,.5]]];for(const f of faces){const b=p.length/3;for(let j=1;j<5;j++){p.push(...f[j]);n.push(...f[0]);}idx.push(b,b+1,b+2,b,b+2,b+3);}return mesh(p,n,idx);}
+function sphere(){const p=[],n=[],idx=[],lat=14,lon=18;for(let y=0;y<=lat;y++){const a=y*Math.PI/lat;for(let x=0;x<=lon;x++){const b=x*2*Math.PI/lon,X=Math.sin(a)*Math.cos(b),Y=Math.cos(a),Z=Math.sin(a)*Math.sin(b);p.push(X*.5,Y*.5,Z*.5);n.push(X,Y,Z);}}for(let y=0;y<lat;y++)for(let x=0;x<lon;x++){const i=y*(lon+1)+x;idx.push(i,i+lon+1,i+1,i+1,i+lon+1,i+lon+2);}return mesh(p,n,idx);}
 const C=cube(),S=sphere();
-function matMul(a,b){let o=new Float32Array(16);for(let r=0;r<4;r++)for(let c=0;c<4;c++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
-function perspective(f,a,n,f2){let t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/a;o[5]=t;o[10]=(f2+n)/(n-f2);o[11]=-1;o[14]=2*f2*n/(n-f2);return o}
-function look(eye,yaw,pitch){let fx=Math.sin(yaw)*Math.cos(pitch),fy=Math.sin(pitch),fz=-Math.cos(yaw)*Math.cos(pitch);let zx=-fx,zy=-fy,zz=-fz;let xx=zz,xy=0,xz=-zx;let l=Math.hypot(xx,xz)||1;xx/=l;xz/=l;let yx=zy*xz-zz*xy,yy=zz*xx-zx*xz,yz=zx*xy-zy*xx;return new Float32Array([xx,yx,zx,0,xy,yy,zy,0,xz,yz,zz,0,-(xx*eye[0]+xy*eye[1]+xz*eye[2]),-(yx*eye[0]+yy*eye[1]+yz*eye[2]),-(zx*eye[0]+zy*eye[1]+zz*eye[2]),1])}
-function model(x,y,z,sx,sy,sz){return new Float32Array([sx,0,0,0,0,sy,0,0,0,0,sz,0,x,y,z,1])}
-let objects=[];
-function add(x,y,z,sx,sy,sz,color,sp=false){objects.push({m:model(x,y,z,sx,sy,sz),color,sp})}
-add(0,-.22,0,24,.4,24,[.19,.17,.22]); // marble floor
-// terrace perimeter walls / glass railing
-for(let x=-10;x<=10;x+=2){add(x,1.0,-8,.08,2,.08,[.35,.47,.58]);add(x,1,8,.08,2,.08,[.35,.47,.58])}
-add(0,1,-8,20,.08,.08,[.38,.5,.62]);add(0,1,8,20,.08,.08,[.38,.5,.62]);
-for(let z=-8;z<=8;z+=2){add(-10,1,z,.08,2,.08,[.35,.47,.58]);add(10,1,z,.08,2,.08,[.35,.47,.58])}
-add(-10,1,0,.08,.08,16,[.38,.5,.62]);add(10,1,0,.08,.08,16,[.38,.5,.62]);
-// lounge furniture
-add(-4,.25,-2,3,.5,1.3,[.23,.12,.18]);add(-4,.65,-2.3,3,.8,.3,[.35,.2,.25]);add(-4,.65,-1.7,3,.8,.3,[.35,.2,.25]);
-add(4,.45,-3,2,.4,1.5,[.22,.16,.14]);add(4,.68,-3,1.7,.12,1.2,[.68,.49,.29]);
-for(let x of [-7,7]){add(x,1.7,-6,.3,3,.3,[.6,.43,.23]);add(x,3.3,-6,.8,.15,.8,[.8,.62,.31]);}
-// city skyline cubes
-for(let i=0;i<32;i++){let x=-19+(i%16)*2.5,z=-17-Math.floor(i/16)*8,h=2+(i*7%9);add(x,h/2,z,1.5,h,1.5,[.13+(i%3)*.025,.15,.24+(i%4)*.02]);}
-// stylized Lorenzo, at (0,0,-3)
-add(0,1.15,-3,.55,1.25,.35,[.09,.1,.15]);add(0,2.05,-3,.48,.48,.45,[.72,.52,.42],true);add(0,1.5,-2.79,.25,.18,.08,[.75,.62,.38]);
-add(-.37,1.15,-3,.16,.9,.18,[.12,.12,.17]);add(.37,1.15,-3,.16,.9,.18,[.12,.12,.17]);
-// planters
-for(let x of [-7,7]){add(x,.3,3,1.5,.6,1.2,[.2,.16,.13]);for(let j=0;j<5;j++)add(x+(j-2)*.22,1.1,3,.35,1.5,.35,[.12,.3,.2],true)}
-let player={x:0,z:5,yaw:0,pitch:0},keys={},score=0,dialog=false;
-function drawObj(o,P,V){let mvp=matMul(P,matMul(V,o.m));gl.uniformMatrix4fv(loc.model,false,o.m);gl.uniformMatrix4fv(loc.mvp,false,mvp);gl.uniform3fv(loc.color,o.color);gl.bindBuffer(gl.ARRAY_BUFFER,o.sp?S.v:C.v);gl.enableVertexAttribArray(loc.p);gl.vertexAttribPointer(loc.p,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.sp?S.n:C.n);gl.enableVertexAttribArray(loc.n);gl.vertexAttribPointer(loc.n,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.sp?S.i:C.i);gl.drawElements(gl.TRIANGLES,o.sp?S.count:C.count,gl.UNSIGNED_SHORT,0)}
-function resize(){let d=Math.min(devicePixelRatio||1,2),w=Math.floor(canvas.clientWidth*d),h=Math.floor(canvas.clientHeight*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)}}
-function render(){resize();gl.enable(gl.DEPTH_TEST);gl.clearColor(.035,.04,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let P=perspective(1.08,canvas.width/canvas.height,.1,100),V=look([player.x,1.65,player.z],player.yaw,player.pitch);gl.uniform3f(loc.light,.4,1,.35);objects.forEach(o=>drawObj(o,P,V));requestAnimationFrame(render)}
-let last=0;function tick(t){let dt=Math.min((t-last)/1000,.04);last=t;if(!dialog&&document.getElementById('start').style.display==='none'){let speed=3*dt,forward=(keys.up||keys.w?1:0)-(keys.down||keys.s?1:0),side=(keys.right||keys.d?1:0)-(keys.left||keys.a?1:0);player.x+=Math.sin(player.yaw)*forward*speed+Math.cos(player.yaw)*side*speed;player.z-=Math.cos(player.yaw)*forward*speed-Math.sin(player.yaw)*side*speed;player.x=Math.max(-8.8,Math.min(8.8,player.x));player.z=Math.max(-6.8,Math.min(6.8,player.z));}requestAnimationFrame(tick)}
-render();requestAnimationFrame(tick);
-document.getElementById('begin').onclick=()=>{document.getElementById('start').style.display='none';toast('Lorenzo\'yu bulmak için terasa doğru ilerle.');};
-function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2300)}
-function bind(id,k){let e=document.getElementById(id);e.addEventListener('pointerdown',ev=>{ev.preventDefault();keys[k]=true;e.setPointerCapture(ev.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>e.addEventListener(v,()=>keys[k]=false))}
-[['up','up'],['down','down'],['left','left'],['right','right']].forEach(a=>bind(...a));
-window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
-let lookEl=document.getElementById('look'),touch=null;
-lookEl.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};lookEl.setPointerCapture(e.pointerId)});
-lookEl.addEventListener('pointermove',e=>{if(!touch)return;let dx=e.clientX-touch.x,dy=e.clientY-touch.y;player.yaw+=dx*.006;player.pitch=Math.max(-.65,Math.min(.65,player.pitch-dy*.004));touch={x:e.clientX,y:e.clientY}});
-['pointerup','pointercancel','lostpointercapture'].forEach(v=>lookEl.addEventListener(v,()=>touch=null));
-function showDialog(speaker,line,opts){dialog=true;document.getElementById('dialog').style.display='block';document.getElementById('controls').style.display='none';document.getElementById('speaker').textContent=speaker;document.getElementById('line').textContent=line;let c=document.getElementById('choices');c.innerHTML='';opts.forEach(o=>{let b=document.createElement('button');b.textContent=o.t;b.onclick=()=>{score+=o.p;document.getElementById('score').textContent='YAKINLIK ♥ '+score;document.getElementById('dialog').style.display='none';document.getElementById('controls').style.display='flex';dialog=false;toast(o.r)};c.appendChild(b)})}
-document.getElementById('act').onclick=()=>{let d=Math.hypot(player.x,player.z+3);if(d<3.2)showDialog('LORENZO MORETTI','“Sonunda geldin. Bu şehrin manzarası güzel ama doğru kişi yanındaysa daha da güzel.”',[{t:'“Kendine fazla güveniyorsun.”',p:0,r:'Lorenzo gülümseyerek geri çekildi.'},{t:'“Belki de manzara o kadar kötü değildir.”',p:1,r:'Lorenzo bunu bir iltifat olarak kabul etti.'},{t:'“Beni neden buraya çağırdın?”',p:0,r:'Lorenzo bakışlarını kaçırdı. Sanki anlatmadığı bir şey vardı.'}]);else toast('Lorenzo sahnenin ortasında, sana yaklaşmanı bekliyor.');};
+function matMul(a,b){const o=new Float32Array(16);for(let r=0;r<4;r++)for(let c=0;c<4;c++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o;}
+function perspective(f,a,n,f2){const t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/a;o[5]=t;o[10]=(f2+n)/(n-f2);o[11]=-1;o[14]=2*f2*n/(n-f2);return o;}
+function look(eye,yaw,pitch){const fx=Math.sin(yaw)*Math.cos(pitch),fy=Math.sin(pitch),fz=-Math.cos(yaw)*Math.cos(pitch),zx=-fx,zy=-fy,zz=-fz;let xx=zz,xz=-zx,l=Math.hypot(xx,xz)||1;xx/=l;xz/=l;const yx=zy*xz,yz=-zy*xx,yy=xx*zz-xz*zx;return new Float32Array([xx,yx,zx,0,0,yy,zy,0,xz,yz,zz,0,-(xx*eye[0]+xz*eye[2]),-(yx*eye[0]+yy*eye[1]+yz*eye[2]),-(zx*eye[0]+zy*eye[1]+zz*eye[2]),1]);}
+function model(x,y,z,sx,sy,sz){return new Float32Array([sx,0,0,0,0,sy,0,0,0,0,sz,0,x,y,z,1]);}
+function rotatedModel(x,y,z,sx,sy,sz,angle){const c=Math.cos(angle),s=Math.sin(angle);return new Float32Array([c*sx,0,-s*sx,0,0,sy,0,0,s*sz,0,c*sz,0,x,y,z,1]);}
+const objects=[];function add(x,y,z,sx,sy,sz,color,sp=false,em=0){objects.push({m:model(x,y,z,sx,sy,sz),color,sp,em});}
+// Softly reflective rooftop and subtle paving seams
+add(0,-.22,0,24,.4,24,[.22,.19,.27]);for(let z=-9;z<=9;z+=2)add(0,-.005,z,20,.012,.018,[.32,.27,.34],false,.025);for(let x=-9;x<=9;x+=2)add(x,-.004,0,.018,.012,20,[.31,.27,.35],false,.02);
+// Terrace glass railings in muted twilight metal
+for(let x=-10;x<=10;x+=2){add(x,1,-8,.07,2,.07,[.39,.42,.55]);add(x,1,8,.07,2,.07,[.39,.42,.55]);}add(0,1,-8,20,.055,.055,[.49,.43,.56]);add(0,1,8,20,.055,.055,[.49,.43,.56]);for(let z=-8;z<=8;z+=2){add(-10,1,z,.07,2,.07,[.39,.42,.55]);add(10,1,z,.07,2,.07,[.39,.42,.55]);}
+// Lounge furniture, warm metallic details
+add(-4,.25,-2,3,.5,1.3,[.30,.16,.23]);add(-4,.65,-2.3,3,.8,.3,[.43,.25,.32]);add(-4,.65,-1.7,3,.8,.3,[.43,.25,.32]);add(4,.45,-3,2,.4,1.5,[.25,.20,.25]);add(4,.68,-3,1.7,.12,1.2,[.73,.51,.31],false,.08);
+// Distant layered skyline with warm window lights
+for(let i=0;i<24;i++){const x=-20+(i%12)*3.5,z=-19-Math.floor(i/12)*9,h=4+(i*7%10),w=2.3+(i%3)*.35;add(x,h/2,z,w,h,2.2,[.18+(i%3)*.025,.17,.29+(i%4)*.025]);add(x,h+.12,z,w+.18,.12,2.35,[.29,.24,.35]);for(let row=1;row<Math.min(5,Math.floor(h/1.5));row++)for(let col=0;col<2;col++)if((i*3+row*5+col)%4!==0)add(x+(col-.5)*.8,h/2-h*.5+row*1.35,z+1.12,.28,.48,.035,[.92,.55,.27],false,.55);}
+// Rooftop lantern posts
+for(const x of [-7,7]){add(x,1.5,-5,.11,3,.11,[.42,.34,.32]);add(x,3.05,-5,.45,.22,.45,[.92,.61,.31],false,.7);add(x,2.82,-5,.33,.2,.33,[1,.72,.44],false,.8);}
+// Planters and foliage
+for(const x of [-7,7]){add(x,.3,3,1.5,.6,1.2,[.25,.18,.16]);for(let j=0;j<5;j++)add(x+(j-2)*.22,1.1,3,.36,1.4,.36,[.16,.33,.25],true,.02);}
+// Lorenzo character, assembled from distinct silhouette pieces; dynamic limbs are drawn separately below
+const player={x:0,z:5,yaw:0,pitch:0},keys={},score=0,dialog=false;
+function drawMesh(meshData,m,color,em,P,V){const mvp=matMul(P,matMul(V,m));gl.uniformMatrix4fv(loc.model,false,m);gl.uniformMatrix4fv(loc.mvp,false,mvp);gl.uniform3fv(loc.color,color);gl.uniform1f(loc.emissive,em||0);gl.bindBuffer(gl.ARRAY_BUFFER,meshData.v);gl.enableVertexAttribArray(loc.p);gl.vertexAttribPointer(loc.p,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,meshData.n);gl.enableVertexAttribArray(loc.n);gl.vertexAttribPointer(loc.n,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,meshData.i);gl.drawElements(gl.TRIANGLES,meshData.count,gl.UNSIGNED_SHORT,0);}
+function drawObj(o,P,V){drawMesh(o.sp?S:C,o.m,o.color,o.em,P,V);}
+function resize(){const d=Math.min(devicePixelRatio||1,2),w=Math.floor(canvas.clientWidth*d),h=Math.floor(canvas.clientHeight*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h);}}
+let walkTime=0,moving=false;
+function drawLorenzo(P,V,time){const bob=moving?Math.abs(Math.sin(time*8))*.045:Math.sin(time*1.7)*.018,sway=moving?Math.sin(time*8)*.12:Math.sin(time*1.4)*.025;const x=0,y=bob,z=-3;
+// coat torso, shoulders, head, hair and face details
+drawMesh(C,model(x,1.25+y,z,.68,.9,.42),[.16,.16,.23],0,P,V);drawMesh(S,model(x,1.68+y,z,.76,.35,.43),[.19,.18,.25],0,P,V);drawMesh(S,model(x,1.98+y,z,.48,.52,.45),[.77,.59,.49],0,P,V);drawMesh(S,model(x,2.19+y,z-.015,.5,.26,.47),[.12,.11,.17],0,P,V);drawMesh(C,model(x,1.89+y,z+.225,.27,.075,.035),[.31,.19,.2],0,P,V);drawMesh(C,model(x,1.53+y,z+.22,.15,.35,.035),[.72,.57,.38],.05,P,V);
+// arms and legs use slight alternating walk swing
+const a1=rotatedModel(-.43,1.27+y,z,.2,.72,.2,sway),a2=rotatedModel(.43,1.27+y,z,.2,.72,.2,-sway);drawMesh(C,a1,[.19,.17,.24],0,P,V);drawMesh(C,a2,[.19,.17,.24],0,P,V);
+const leg1=rotatedModel(-.19,.63+y,z,.23,.7,.25,-sway),leg2=rotatedModel(.19,.63+y,z,.23,.7,.25,sway);drawMesh(C,leg1,[.12,.13,.2],0,P,V);drawMesh(C,leg2,[.12,.13,.2],0,P,V);drawMesh(C,model(-.19,.27+y,z+.06,.27,.16,.4),[.09,.09,.13],0,P,V);drawMesh(C,model(.19,.27+y,z+.06,.27,.16,.4),[.09,.09,.13],0,P,V);
+}
+function render(time){resize();gl.enable(gl.DEPTH_TEST);gl.clearColor(0,0,0,0);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);const P=perspective(1.08,canvas.width/canvas.height,.1,100),V=look([player.x,2.15,player.z],player.yaw,player.pitch);gl.uniform3f(loc.lightDir,-.45,.82,.38);for(const o of objects)drawObj(o,P,V);drawLorenzo(P,V,time);}
+let last=0;function tick(t){const dt=Math.min((t-last)/1000,.04);last=t;const started=document.getElementById('start').style.display==='none';if(!dialog&&started){const speed=3*dt,forward=(keys.up||keys.w||keys.arrowup?1:0)-(keys.down||keys.s||keys.arrowdown?1:0),side=(keys.right||keys.d||keys.arrowright?1:0)-(keys.left||keys.a||keys.arrowleft?1:0);moving=!!(forward||side);if(moving){const len=Math.hypot(forward,side)||1, f=forward/len*speed,s=side/len*speed;player.x+=Math.cos(player.yaw)*s+Math.sin(player.yaw)*f;player.z+=-Math.sin(player.yaw)*s-Math.cos(player.yaw)*f;player.x=Math.max(-8.8,Math.min(8.8,player.x));player.z=Math.max(-6.8,Math.min(7.2,player.z));walkTime+=dt;}}else moving=false;render(t/1000);requestAnimationFrame(tick);}
+function toast(text){const e=document.getElementById('toast');e.textContent=text;e.style.display='block';setTimeout(()=>e.style.display='none',2300);}
+document.getElementById('begin').onclick=()=>{document.getElementById('start').style.display='none';toast("Lorenzo'yu bulmak için terasa doğru ilerle.");};
+function bind(id,k){const e=document.getElementById(id);e.addEventListener('pointerdown',ev=>{ev.preventDefault();keys[k]=true;e.setPointerCapture(ev.pointerId);});['pointerup','pointercancel','lostpointercapture'].forEach(v=>e.addEventListener(v,()=>keys[k]=false));}
+[['up','up'],['down','down'],['left','left'],['right','right']].forEach(a=>bind(...a));window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+let lookEl=document.getElementById('look'),touch=null;lookEl.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};lookEl.setPointerCapture(e.pointerId);});lookEl.addEventListener('pointermove',e=>{if(!touch)return;const dx=e.clientX-touch.x,dy=e.clientY-touch.y;player.yaw+=dx*.006;player.pitch=Math.max(-.65,Math.min(.65,player.pitch-dy*.004));touch={x:e.clientX,y:e.clientY};});['pointerup','pointercancel','lostpointercapture'].forEach(v=>lookEl.addEventListener(v,()=>touch=null));
+function showDialog(speaker,line,options){dialog=true;document.getElementById('dialog').style.display='block';document.getElementById('controls').style.display='none';document.getElementById('speaker').textContent=speaker;document.getElementById('line').textContent=line;const choices=document.getElementById('choices');choices.innerHTML='';options.forEach(option=>{const b=document.createElement('button');b.textContent=option.text;b.onclick=()=>{score+=option.points;document.getElementById('score').textContent='YAKINLIK ♥ '+score;document.getElementById('dialog').style.display='none';document.getElementById('controls').style.display='flex';dialog=false;toast(option.reply);};choices.appendChild(b);});}
+document.getElementById('act').onclick=()=>{const d=Math.hypot(player.x,player.z+3);if(d<3.2)showDialog('LORENZO MORETTI','“Sonunda geldin. Bu şehrin manzarası güzel ama doğru kişi yanındaysa daha da güzel.”',[{text:'“Manzara gerçekten büyüleyici.”',points:1,reply:'Lorenzo gülümsüyor. Aranızdaki yakınlık arttı.'},{text:'“Beni buraya neden çağırdın?”',points:2,reply:'Lorenzo sana içtenlikle bakıyor. Aranızdaki yakınlık arttı.'}]);else toast('Lorenzo ile konuşmak için biraz daha yaklaş.');};
+requestAnimationFrame(tick);
 })();
-</script></body></html>
+</script>
+</body>
+</html>
