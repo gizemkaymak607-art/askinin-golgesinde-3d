@@ -1,2 +1,88 @@
 # askinin-golgesinde-3d
 Aşkın Gölgesinde 3d Android oyunu
+<!doctype html>
+<html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no"><meta name="theme-color" content="#090b16"><title>Aşkın Gölgesinde 3D</title>
+<style>
+*{box-sizing:border-box}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:#090b16;color:#fff;font-family:Arial,sans-serif;touch-action:none}
+#game{position:fixed;inset:0}canvas{width:100%;height:100%;display:block}
+#top{position:absolute;top:env(safe-area-inset-top,10px);left:0;right:0;padding:12px 16px;display:flex;justify-content:space-between;pointer-events:none;text-shadow:0 2px 5px #000}
+.brand{font-family:Georgia,serif;font-size:19px;color:#e6c78e;letter-spacing:1px}.small{font-size:10px;letter-spacing:2px;color:#e9d9bd;margin-top:4px}
+#hint{position:absolute;top:78px;left:50%;transform:translateX(-50%);background:#100e1bcc;border:1px solid #d3b47866;border-radius:20px;padding:9px 14px;font-size:12px;white-space:nowrap;max-width:90%;text-align:center}
+#dialog{position:absolute;left:12px;right:12px;bottom:18px;background:linear-gradient(145deg,#211b2aee,#100e18f5);border:1px solid #c8a56b88;border-radius:18px;padding:17px;display:none;box-shadow:0 10px 35px #0009}
+#speaker{font-size:11px;letter-spacing:2px;color:#e6c78e;margin-bottom:8px}#line{font-family:Georgia,serif;font-size:17px;line-height:1.45;margin-bottom:13px}
+.choices{display:flex;gap:8px;flex-wrap:wrap}button{background:linear-gradient(135deg,#72505a,#382b3d);color:white;border:1px solid #c8a56b;border-radius:12px;padding:12px 14px;font-size:13px;flex:1;min-width:130px}
+#controls{position:absolute;bottom:22px;left:18px;right:18px;display:flex;justify-content:space-between;align-items:end;pointer-events:none}
+.pad{width:132px;height:132px;position:relative;pointer-events:auto}
+.key{position:absolute;width:42px;height:42px;border-radius:13px;background:#181625bb;border:1px solid #d6bd8b88;color:white;display:grid;place-items:center;font-size:19px;user-select:none}
+#up{top:0;left:45px}#down{bottom:0;left:45px}#left{top:45px;left:0}#right{top:45px;right:0}
+#act{pointer-events:auto;border-radius:50%;width:76px;height:76px;background:#7a4b60dd;font-weight:bold}
+#look{position:absolute;right:0;top:22%;width:48%;height:52%;pointer-events:auto}
+#start{position:absolute;inset:0;background:radial-gradient(ellipse at 50% 35%,#46334a,#090b16 75%);display:flex;align-items:center;justify-content:center;padding:24px;text-align:center}
+.panel{max-width:420px;background:#171521dd;border:1px solid #d1ae7288;border-radius:22px;padding:25px;box-shadow:0 20px 60px #0009}
+h1{font-family:Georgia,serif;font-weight:normal;color:#e8c990;font-size:34px;margin:8px 0}.sub{font-size:11px;letter-spacing:3px;color:#d4b987}.panel p{color:#e7dfe6;line-height:1.5;font-size:14px}.panel button{width:100%;margin-top:12px;padding:15px}
+#toast{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);background:#171521ed;padding:15px 20px;border:1px solid #d1ae72;border-radius:14px;display:none;text-align:center}
+@media(min-width:700px){#controls{max-width:720px;margin:auto;left:0;right:0}.pad{width:150px;height:150px}}
+</style></head><body>
+<div id="game"><canvas id="gl"></canvas></div>
+<div id="top"><div><div class="brand">Aşkın Gölgesinde</div><div class="small">3D ROMANTİK MACERA</div></div><div class="small" id="score">YAKINLIK ♥ 0</div></div>
+<div id="hint">WASD / ok tuşları veya ekrandaki yön tuşlarıyla ilerle · Sağ tarafı sürükleyerek etrafa bak</div>
+<div id="look"></div>
+<div id="controls"><div class="pad"><div class="key" id="up">▲</div><div class="key" id="down">▼</div><div class="key" id="left">◀</div><div class="key" id="right">▶</div></div><button id="act">ETKİLEŞİM</button></div>
+<div id="dialog"><div id="speaker">LORENZO MORETTI</div><div id="line"></div><div class="choices" id="choices"></div></div>
+<div id="toast"></div>
+<div id="start"><div class="panel"><div class="sub">NEW YORK · 22:45</div><h1>Aşkın Gölgesinde</h1><p>Şehrin ışıkları altında lüks bir çatı katında başlayan 3D romantik macera. Etrafı keşfet, Lorenzo'yu bul ve hikâyenin yönünü seçimlerinle belirle.</p><button id="begin">OYUNA BAŞLA</button><div class="small" style="margin-top:14px">TELEFONDA DOKUNARAK OYNANIR</div></div></div>
+<script>
+(()=>{
+const canvas=document.getElementById('gl'), gl=canvas.getContext('webgl',{antialias:true});
+if(!gl){document.getElementById('hint').textContent='Bu tarayıcı WebGL desteklemiyor.';return;}
+const vs=`attribute vec3 p; attribute vec3 n; uniform mat4 mvp; uniform mat4 model; varying vec3 N; varying vec3 W; void main(){vec4 w=model*vec4(p,1.);W=w.xyz;N=mat3(model)*n;gl_Position=mvp*vec4(p,1.);}`;
+const fs=`precision mediump float; varying vec3 N; varying vec3 W; uniform vec3 color; uniform vec3 lightDir; void main(){float d=max(dot(normalize(N),normalize(lightDir)),0.);float city=0.05+0.16*max(0.,sin(W.x*13.)*sin(W.z*17.));vec3 c=color*(0.38+0.62*d)+vec3(city*.9,city*.65,city);gl_FragColor=vec4(c,1.);}`;
+function shader(type,src){let s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s}
+let prog=gl.createProgram();gl.attachShader(prog,shader(gl.VERTEX_SHADER,vs));gl.attachShader(prog,shader(gl.FRAGMENT_SHADER,fs));gl.linkProgram(prog);gl.useProgram(prog);
+let loc={p:gl.getAttribLocation(prog,'p'),n:gl.getAttribLocation(prog,'n'),mvp:gl.getUniformLocation(prog,'mvp'),model:gl.getUniformLocation(prog,'model'),color:gl.getUniformLocation(prog,'color'),light:gl.getUniformLocation(prog,'lightDir')};
+function mesh(pos,norm,idx){let b={};b.v=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b.v);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(pos),gl.STATIC_DRAW);b.n=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,b.n);gl.bufferData(gl.ARRAY_BUFFER,new Float32Array(norm),gl.STATIC_DRAW);b.i=gl.createBuffer();gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,b.i);gl.bufferData(gl.ELEMENT_ARRAY_BUFFER,new Uint16Array(idx),gl.STATIC_DRAW);b.count=idx.length;return b}
+function cube(){let p=[],n=[],idx=[];let faces=[[[0,0,1],[-.5,-.5,.5],[.5,-.5,.5],[.5,.5,.5],[-.5,.5,.5]],[[0,0,-1],[.5,-.5,-.5],[-.5,-.5,-.5],[-.5,.5,-.5],[.5,.5,-.5]],[[1,0,0],[.5,-.5,.5],[.5,-.5,-.5],[.5,.5,-.5],[.5,.5,.5]],[[-1,0,0],[-.5,-.5,-.5],[-.5,-.5,.5],[-.5,.5,.5],[-.5,.5,-.5]],[[0,1,0],[-.5,.5,.5],[.5,.5,.5],[.5,.5,-.5],[-.5,.5,-.5]],[[0,-1,0],[-.5,-.5,-.5],[.5,-.5,-.5],[.5,-.5,.5],[-.5,-.5,.5]]];faces.forEach(f=>{let k=p.length/3;for(let i=1;i<5;i++){p.push(...f[i]);n.push(...f[0])}idx.push(k,k+1,k+2,k,k+2,k+3)});return mesh(p,n,idx)}
+function sphere(){let p=[],n=[],idx=[],lat=10,lon=14;for(let y=0;y<=lat;y++){let a=y*Math.PI/lat;for(let x=0;x<=lon;x++){let b=x*2*Math.PI/lon,X=Math.sin(a)*Math.cos(b),Y=Math.cos(a),Z=Math.sin(a)*Math.sin(b);p.push(X*.5,Y*.5,Z*.5);n.push(X,Y,Z)}}for(let y=0;y<lat;y++)for(let x=0;x<lon;x++){let i=y*(lon+1)+x;idx.push(i,i+lon+1,i+1,i+1,i+lon+1,i+lon+2)}return mesh(p,n,idx)}
+const C=cube(),S=sphere();
+function matMul(a,b){let o=new Float32Array(16);for(let r=0;r<4;r++)for(let c=0;c<4;c++)o[c*4+r]=a[r]*b[c*4]+a[4+r]*b[c*4+1]+a[8+r]*b[c*4+2]+a[12+r]*b[c*4+3];return o}
+function perspective(f,a,n,f2){let t=1/Math.tan(f/2),o=new Float32Array(16);o[0]=t/a;o[5]=t;o[10]=(f2+n)/(n-f2);o[11]=-1;o[14]=2*f2*n/(n-f2);return o}
+function look(eye,yaw,pitch){let fx=Math.sin(yaw)*Math.cos(pitch),fy=Math.sin(pitch),fz=-Math.cos(yaw)*Math.cos(pitch);let zx=-fx,zy=-fy,zz=-fz;let xx=zz,xy=0,xz=-zx;let l=Math.hypot(xx,xz)||1;xx/=l;xz/=l;let yx=zy*xz-zz*xy,yy=zz*xx-zx*xz,yz=zx*xy-zy*xx;return new Float32Array([xx,yx,zx,0,xy,yy,zy,0,xz,yz,zz,0,-(xx*eye[0]+xy*eye[1]+xz*eye[2]),-(yx*eye[0]+yy*eye[1]+yz*eye[2]),-(zx*eye[0]+zy*eye[1]+zz*eye[2]),1])}
+function model(x,y,z,sx,sy,sz){return new Float32Array([sx,0,0,0,0,sy,0,0,0,0,sz,0,x,y,z,1])}
+let objects=[];
+function add(x,y,z,sx,sy,sz,color,sp=false){objects.push({m:model(x,y,z,sx,sy,sz),color,sp})}
+add(0,-.22,0,24,.4,24,[.19,.17,.22]); // marble floor
+// terrace perimeter walls / glass railing
+for(let x=-10;x<=10;x+=2){add(x,1.0,-8,.08,2,.08,[.35,.47,.58]);add(x,1,8,.08,2,.08,[.35,.47,.58])}
+add(0,1,-8,20,.08,.08,[.38,.5,.62]);add(0,1,8,20,.08,.08,[.38,.5,.62]);
+for(let z=-8;z<=8;z+=2){add(-10,1,z,.08,2,.08,[.35,.47,.58]);add(10,1,z,.08,2,.08,[.35,.47,.58])}
+add(-10,1,0,.08,.08,16,[.38,.5,.62]);add(10,1,0,.08,.08,16,[.38,.5,.62]);
+// lounge furniture
+add(-4,.25,-2,3,.5,1.3,[.23,.12,.18]);add(-4,.65,-2.3,3,.8,.3,[.35,.2,.25]);add(-4,.65,-1.7,3,.8,.3,[.35,.2,.25]);
+add(4,.45,-3,2,.4,1.5,[.22,.16,.14]);add(4,.68,-3,1.7,.12,1.2,[.68,.49,.29]);
+for(let x of [-7,7]){add(x,1.7,-6,.3,3,.3,[.6,.43,.23]);add(x,3.3,-6,.8,.15,.8,[.8,.62,.31]);}
+// city skyline cubes
+for(let i=0;i<32;i++){let x=-19+(i%16)*2.5,z=-17-Math.floor(i/16)*8,h=2+(i*7%9);add(x,h/2,z,1.5,h,1.5,[.13+(i%3)*.025,.15,.24+(i%4)*.02]);}
+// stylized Lorenzo, at (0,0,-3)
+add(0,1.15,-3,.55,1.25,.35,[.09,.1,.15]);add(0,2.05,-3,.48,.48,.45,[.72,.52,.42],true);add(0,1.5,-2.79,.25,.18,.08,[.75,.62,.38]);
+add(-.37,1.15,-3,.16,.9,.18,[.12,.12,.17]);add(.37,1.15,-3,.16,.9,.18,[.12,.12,.17]);
+// planters
+for(let x of [-7,7]){add(x,.3,3,1.5,.6,1.2,[.2,.16,.13]);for(let j=0;j<5;j++)add(x+(j-2)*.22,1.1,3,.35,1.5,.35,[.12,.3,.2],true)}
+let player={x:0,z:5,yaw:0,pitch:0},keys={},score=0,dialog=false;
+function drawObj(o,P,V){let mvp=matMul(P,matMul(V,o.m));gl.uniformMatrix4fv(loc.model,false,o.m);gl.uniformMatrix4fv(loc.mvp,false,mvp);gl.uniform3fv(loc.color,o.color);gl.bindBuffer(gl.ARRAY_BUFFER,o.sp?S.v:C.v);gl.enableVertexAttribArray(loc.p);gl.vertexAttribPointer(loc.p,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ARRAY_BUFFER,o.sp?S.n:C.n);gl.enableVertexAttribArray(loc.n);gl.vertexAttribPointer(loc.n,3,gl.FLOAT,false,0,0);gl.bindBuffer(gl.ELEMENT_ARRAY_BUFFER,o.sp?S.i:C.i);gl.drawElements(gl.TRIANGLES,o.sp?S.count:C.count,gl.UNSIGNED_SHORT,0)}
+function resize(){let d=Math.min(devicePixelRatio||1,2),w=Math.floor(canvas.clientWidth*d),h=Math.floor(canvas.clientHeight*d);if(canvas.width!==w||canvas.height!==h){canvas.width=w;canvas.height=h;gl.viewport(0,0,w,h)}}
+function render(){resize();gl.enable(gl.DEPTH_TEST);gl.clearColor(.035,.04,.09,1);gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);let P=perspective(1.08,canvas.width/canvas.height,.1,100),V=look([player.x,1.65,player.z],player.yaw,player.pitch);gl.uniform3f(loc.light,.4,1,.35);objects.forEach(o=>drawObj(o,P,V));requestAnimationFrame(render)}
+let last=0;function tick(t){let dt=Math.min((t-last)/1000,.04);last=t;if(!dialog&&document.getElementById('start').style.display==='none'){let speed=3*dt,forward=(keys.up||keys.w?1:0)-(keys.down||keys.s?1:0),side=(keys.right||keys.d?1:0)-(keys.left||keys.a?1:0);player.x+=Math.sin(player.yaw)*forward*speed+Math.cos(player.yaw)*side*speed;player.z-=Math.cos(player.yaw)*forward*speed-Math.sin(player.yaw)*side*speed;player.x=Math.max(-8.8,Math.min(8.8,player.x));player.z=Math.max(-6.8,Math.min(6.8,player.z));}requestAnimationFrame(tick)}
+render();requestAnimationFrame(tick);
+document.getElementById('begin').onclick=()=>{document.getElementById('start').style.display='none';toast('Lorenzo\'yu bulmak için terasa doğru ilerle.');};
+function toast(t){let e=document.getElementById('toast');e.textContent=t;e.style.display='block';setTimeout(()=>e.style.display='none',2300)}
+function bind(id,k){let e=document.getElementById(id);e.addEventListener('pointerdown',ev=>{ev.preventDefault();keys[k]=true;e.setPointerCapture(ev.pointerId)});['pointerup','pointercancel','lostpointercapture'].forEach(v=>e.addEventListener(v,()=>keys[k]=false))}
+[['up','up'],['down','down'],['left','left'],['right','right']].forEach(a=>bind(...a));
+window.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true});window.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false});
+let lookEl=document.getElementById('look'),touch=null;
+lookEl.addEventListener('pointerdown',e=>{touch={x:e.clientX,y:e.clientY};lookEl.setPointerCapture(e.pointerId)});
+lookEl.addEventListener('pointermove',e=>{if(!touch)return;let dx=e.clientX-touch.x,dy=e.clientY-touch.y;player.yaw+=dx*.006;player.pitch=Math.max(-.65,Math.min(.65,player.pitch-dy*.004));touch={x:e.clientX,y:e.clientY}});
+['pointerup','pointercancel','lostpointercapture'].forEach(v=>lookEl.addEventListener(v,()=>touch=null));
+function showDialog(speaker,line,opts){dialog=true;document.getElementById('dialog').style.display='block';document.getElementById('controls').style.display='none';document.getElementById('speaker').textContent=speaker;document.getElementById('line').textContent=line;let c=document.getElementById('choices');c.innerHTML='';opts.forEach(o=>{let b=document.createElement('button');b.textContent=o.t;b.onclick=()=>{score+=o.p;document.getElementById('score').textContent='YAKINLIK ♥ '+score;document.getElementById('dialog').style.display='none';document.getElementById('controls').style.display='flex';dialog=false;toast(o.r)};c.appendChild(b)})}
+document.getElementById('act').onclick=()=>{let d=Math.hypot(player.x,player.z+3);if(d<3.2)showDialog('LORENZO MORETTI','“Sonunda geldin. Bu şehrin manzarası güzel ama doğru kişi yanındaysa daha da güzel.”',[{t:'“Kendine fazla güveniyorsun.”',p:0,r:'Lorenzo gülümseyerek geri çekildi.'},{t:'“Belki de manzara o kadar kötü değildir.”',p:1,r:'Lorenzo bunu bir iltifat olarak kabul etti.'},{t:'“Beni neden buraya çağırdın?”',p:0,r:'Lorenzo bakışlarını kaçırdı. Sanki anlatmadığı bir şey vardı.'}]);else toast('Lorenzo sahnenin ortasında, sana yaklaşmanı bekliyor.');};
+})();
+</script></body></html>
